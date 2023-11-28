@@ -1,0 +1,19 @@
+{
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": [
+        "source.fixAll.eslint",
+        "source.fixAll.stylelint",
+    ],
+    "stylelint.enable": true,
+    "stylelint.validate": [
+        "css",
+        "scss",
+        "vue"
+    ],
+    "eslint.validate": [
+        "typescript",
+        "vue"
+    ],
+    "files.insertFinalNewline": true,
+}
