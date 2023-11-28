@@ -1,22 +1,39 @@
 <script setup lang="ts">
 import { ref, onBeforeMount } from "vue";
+import { IAddCostumerForm, type ICostumer, type IAllCostumersResponse } from "@/models";
+import { CostumersView } from "./../views";
+import { useAppStore } from "@/stores";
 
+const appStore = useAppStore();
 const tab = ref("CST");
-
+const costumers = ref<ICostumer[]>([]);
 
 onBeforeMount(async () => {
     await init();
 });
 
 async function init(): Promise<void> {
-    
+    await loadCostumers();
+}
+
+async function loadCostumers(): Promise<void> {
+    await appStore.loadCostumers();
+    costumers.value = appStore.costumers;
 }
 
 </script>
 
+<style lang="scss" scoped>
+.imagecontainer {
+    text-align: center;
+}
+</style>
+
 <template>
     <div class="q-pa-md felx justify-center centers" >
-        <q-img src="@/assets/banner.png" style="height: 110px; width: 530px" />
+        <div class="imagecontainer">
+            <q-img src="@/assets/banner.png" style="height: 110px; width: 530px" />
+        </div>
     </div>
 
     <div class="q-pa-md felx justify-center centers">
@@ -32,7 +49,7 @@ async function init(): Promise<void> {
         </div>
     </div>
     <div v-if="tab === 'CST'">
-        
+        <costumers-view :costumers="costumers" @reload="loadCostumers()" />
     </div>
     <div v-if="tab === 'ACC'">
         
