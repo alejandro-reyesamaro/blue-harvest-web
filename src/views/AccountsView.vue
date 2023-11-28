@@ -1,20 +1,24 @@
 <script lang="ts" setup>
 import { ref, onBeforeMount } from "vue";
-import { IAddCostumerForm, type ICostumer } from "@/models";
-import { CostumerService } from "@/services";
+import { IAddAccountForm, type ICostumer, type IAccount } from "@/models";
+import { AccountService } from "@/services";
+import { CostumerAccountsView } from "./../components";
 import { log } from "console";
 
-const costumerService = new CostumerService();
-const selected = ref<ICostumer[]>([]);
+const accountService = new AccountService();
 const addDialog = ref<boolean>(false);
+const options = ref<any[]>([]);
+const costumerAccounts = ref<IAccount[]>([]);
 
-// <new costumer>
-const newCostumerName = ref<string>("");
-const newCostumerSurname = ref<string>("");
+// Selected
+const selected = ref(null);
+
+// <new account>
+const newAccountName = ref<string>("");
+const newAccountCredit = ref<number>(0);
 
 // Rules
 const rulesName = [ val => !!val || "Name field is required" ];
-const rulesSurname = [ val => !!val || "Surname field is required" ];
 
 const props = withDefaults(
     defineProps<{
@@ -25,9 +29,6 @@ const props = withDefaults(
     },
 );
 
-const emit = defineEmits<{ 
-    "reload": [];
-}>();
 
 const columns = [
     {
@@ -39,10 +40,10 @@ const columns = [
         sortable: false,
     },
     { 
-        name: "surname", 
+        name: "balance", 
         align: "center", 
-        label: "Surname", 
-        field: (row: { surname: string }): string => row.surname, 
+        label: "Balance", 
+        field: (row: { balance: number }): number => row.balance, 
         sortable: false, 
     },
     { 
@@ -53,40 +54,59 @@ const columns = [
 ];
 
 onBeforeMount(async () => {
-    selected.value = props.costumers;
+    options.value = props.costumers.map(c => {
+        return {
+            label: c.name,
+            value: c.id,
+        };
+    });
 });
 
-function addDisabled(): boolean {
-    return (this.newCostumerName.length <= 0) || (this.newCostumerSurname.length  <= 0);
+async function onChange() : Promise<void> {
+    await loadAccounts();
 }
 
 async function onAdd(): Promise<void> {
-    const newCostumer: IAddCostumerForm = {
-        name: newCostumerName.value,
-        surname: newCostumerSurname.value,
+    const newAccount: IAddAccountForm = {
+        costumerId: selected.value.value,
+        name: newAccountName.value,
+        initialCredit: newAccountCredit.value,
     };
-    await costumerService.add(newCostumer);
+    await accountService.add(newAccount);
     this.addDialog = false;
-    this.emit("reload");
+    loadAccounts();
+}
+
+async function loadAccounts(): Promise<void> {
+    const response = await accountService.getCostumerAccounts(selected.value.value);
+    costumerAccounts.value = response.accounts;
 }
 
 </script>
 
 <template>
+    <div class="q-pa-sm" >
+        <q-select 
+            outlined 
+            v-model="selected" 
+            :options="options"
+            label="Costumer" 
+            @update:model-value="onChange" 
+            style="min-width: 250px; max-width: 300px" />
+    </div>
     <div class="q-pa-md">
         <q-table
-            title="Costumers"
-            :rows="props.costumers"
-            row-key="costumerId"
+            title="Accounts"
+            :rows="costumerAccounts"
+            row-key="id"
             :columns="columns"
             flat 
             bordered
             selection="multiple"
-            v-model:selected="selected"
             :rows-per-page-options="[10, 15, 20]"
         >
             <template v-slot:top>
-                <b>Costumers</b>
+                <b>Accounts</b>
             </template>
             <template v-slot:header-selection="">
             </template>
@@ -102,7 +122,7 @@ async function onAdd(): Promise<void> {
         </q-table>
     </div>
     <div class="q-pa-sm q-gutter-sm">
-        <q-btn icon="add" color="primary" label="Add costumer" @click="addDialog = true"/>
+        <q-btn icon="add" color="primary" :disable="selected?.value == null" label="Add account" @click="addDialog = true"/>
     </div>
 
     <q-dialog v-model="addDialog">
@@ -110,7 +130,7 @@ async function onAdd(): Promise<void> {
             <q-card-section>
                 <div class="text-h6">
                     <q-icon name="add" />
-                    Add a costumer
+                    Add an account for {{selected.label}}
                 </div>
             </q-card-section>
 
@@ -118,8 +138,13 @@ async function onAdd(): Promise<void> {
 
             <q-card-section style="max-height: 50vh" class="scroll">
                 <div class="q-gutter-md">
-                    <q-input filled v-model="newCostumerName" label="Name" :rules="rulesName" />
-                    <q-input filled v-model="newCostumerSurname" label="Surname" :rules="rulesSurname" />
+                    <q-input filled v-model="newAccountName" label="Name" :rules="rulesName" />
+                    <q-input
+                        v-model.number="newAccountCredit"
+                        filled
+                        prefix="$"
+                        type="number"
+                    />
                 </div>
             </q-card-section>
 
@@ -127,12 +152,7 @@ async function onAdd(): Promise<void> {
 
             <q-card-actions align="right">
                 <q-btn flat label="Cancel" color="decondary" v-close-popup />
-                <q-btn 
-                    flat 
-                    label="Add" 
-                    :disable="addDisabled()" 
-                    color="primary" 
-                    @click="onAdd()" />
+                <q-btn flat label="Add" :disable="newAccountName.length <= 0" color="primary" @click="onAdd()" />
             </q-card-actions>
         </q-card>
     </q-dialog>
