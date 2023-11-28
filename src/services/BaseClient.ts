@@ -9,9 +9,6 @@ export class BaseClient {
             baseURL: `${import.meta.env.VITE_APP_WEB_API_BASE_URL}${uriPath}`,
             responseType: "json",
         });
-
-        //this.apiClient.interceptors.request.use(this.requestInterceptor);
-        //this.apiClient.interceptors.response.use(undefined, this.errorResponseInterceptor);
     }
 
     protected checkResponseStatus(status: number): boolean {
@@ -48,26 +45,4 @@ export class BaseClient {
             message: msg,
         });
     }
-
-    /*
-    private async requestInterceptor(request: InternalAxiosRequestConfig) {
-        const accessToken = await authService.getAccessToken();
-
-        // Add Authorization token
-        if (accessToken != null && request.headers) {
-            request.headers.Authorization = `Bearer ${accessToken}`;
-        }
-
-        return Promise.resolve(request);
-    }
-
-    private async errorResponseInterceptor(error: AxiosError) {
-        // If the user is unauthenticated, retry login
-        if (error.response?.status === 401) {
-            await authService.getAccessToken();
-        }
-
-        return Promise.reject(error);
-    }
-    */
 }
