@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onBeforeMount } from "vue";
 import { IAddCostumerForm, type ICostumer, type IAllCostumersResponse } from "@/models";
-import { CostumersView, AccountsView } from "./../views";
+import { CostumersView, AccountsView, TransfersView } from "./../views";
 import { useAppStore } from "@/stores";
 
 const appStore = useAppStore();
@@ -54,6 +54,6 @@ async function loadCostumers(): Promise<void> {
         <accounts-view :costumers="costumers" />
     </div>
     <div v-if="tab === 'TRF'">
-        
+        <transfers-view />
     </div>
 </template>
