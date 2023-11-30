@@ -120,6 +120,10 @@ function tooMuchAmount(): boolean {
     padding: 0px
   > div + div
     margin-top: 1rem
+.card
+  width: 100%
+  max-width: 250px
+
 </style>
 
 <template>
@@ -224,9 +228,32 @@ function tooMuchAmount(): boolean {
                 title="Confirmation"
                 icon="savings"
             >
+                <div class="q-pa-md row items-start q-gutter-md">
+                    <q-card class="card">
+                        <q-card-section>
+                            <div class="text-h7">Source: <b>{{sourceAccountSelected?.label}}</b></div>
+                            <div class="text-subtitle3">by {{sourceCostumerSelected?.label}}</div>
+                        </q-card-section>
+                    </q-card>
+                </div>
+                <div class="q-pa-md row items-start q-gutter-md">
+                    <q-card class="card">
+                        <q-card-section>
+                            <div class="text-h7">Target: <b>{{targetAccountSelected?.label}}</b></div>
+                            <div class="text-subtitle3">by {{targetCostumerSelected?.label}}</div>
+                        </q-card-section>
+                    </q-card>
+                </div>
+                <div class="q-pa-md row items-start q-gutter-md">
+                    <q-card class="card">
+                        <q-card-section>
+                            <div class="text-h7">Amount: $<b>{{amount}}</b></div>
+                        </q-card-section>
+                    </q-card>
+                </div>
                 <q-stepper-navigation>
                     <q-btn color="primary" label="Finish" />
-                    <q-btn flat @click="step = 2" color="primary" label="Back" class="q-ml-sm" />
+                    <q-btn flat @click="step = 3" color="primary" label="Back" class="q-ml-sm" />
                 </q-stepper-navigation>
             </q-step>
         </q-stepper>
