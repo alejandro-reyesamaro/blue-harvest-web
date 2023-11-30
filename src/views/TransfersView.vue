@@ -18,6 +18,8 @@ const targetAccounts = ref<IAccount[]>([]);
 const targetAccountSelected = ref(null);
 const targetAccountOptions = ref<any[]>([]);
 
+const amount = ref<number>(0);
+
 const props = withDefaults(
     defineProps<{
         costumers: ICostumer[];
@@ -100,6 +102,16 @@ function notEnoughCredit(): boolean {
     return balance <= 0;
 }
 
+function wrongAmount(): boolean {
+    return amount.value <= 0 || tooMuchAmount();
+}
+
+function tooMuchAmount(): boolean {
+    const sourceAccount = sourceAccounts.value.find(s => s.id === sourceAccountSelected?.value.value);
+    const balance = sourceAccount.balance;
+    return balance < amount.value;
+}
+
 </script>
 
 <style lang="sass">
@@ -177,7 +189,7 @@ function notEnoughCredit(): boolean {
                 <q-stepper-navigation>
                     <q-btn @click="step = 3" :disable="continuerStep2Disabled()" color="primary" label="Continue">
                         <q-tooltip v-if="continuerStep2Disabled()">
-                            Enabled only if both accounts are selected and there is enoug credit in the source account
+                            Enabled only if both accounts are selected and there is enough credit in the source account
                         </q-tooltip>
                     </q-btn>
                     <q-btn flat @click="step = 1" color="primary" label="Back" class="q-ml-sm" />
@@ -188,11 +200,23 @@ function notEnoughCredit(): boolean {
                 :name="3"
                 title="Enter the amount"
                 icon="monetization_on"
+                :done="step > 3"
             >
+                <q-input
+                    v-model.number="amount"
+                    filled
+                    prefix="$"
+                    type="number"
+                />
+                    
                 <q-stepper-navigation>
-                    <q-btn @click="step = 4" color="primary" label="Continue" />
+                    <q-btn @click="step = 4" :disable="wrongAmount()" color="primary" label="Continue">
+                        <q-tooltip v-if="wrongAmount()">
+                            Enabled only if the source account has enough credit
+                        </q-tooltip>
+                    </q-btn>
                     <q-btn flat @click="step = 2" color="primary" label="Back" class="q-ml-sm" />
-                </q-stepper-navigation>.
+                </q-stepper-navigation>
             </q-step>
 
             <q-step
