@@ -54,6 +54,6 @@ async function loadCostumers(): Promise<void> {
         <accounts-view :costumers="costumers" />
     </div>
     <div v-if="tab === 'TRF'">
-        <transfers-view />
+        <transfers-view :costumers="costumers" />
     </div>
 </template>
