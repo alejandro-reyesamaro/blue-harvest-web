@@ -12,6 +12,12 @@ const sourceAccounts = ref<IAccount[]>([]);
 const sourceAccountSelected = ref(null);
 const sourceAccountOptions = ref<any[]>([]);
 
+const targetCostumerSelected = ref(null);
+const targetCostumerOptions = ref<any[]>([]);
+const targetAccounts = ref<IAccount[]>([]);
+const targetAccountSelected = ref(null);
+const targetAccountOptions = ref<any[]>([]);
+
 const props = withDefaults(
     defineProps<{
         costumers: ICostumer[];
@@ -28,11 +34,14 @@ onBeforeMount(async () => {
             value: c.id,
         };
     });
+    targetCostumerOptions.value = props.costumers.map(c => {
+        return {
+            label: c.name,
+            value: c.id,
+        };
+    });
 });
 
-function onStepOneContinue(): void {
-    step.value = 2;
-}
 
 async function onSourceCostumerChange(): Promise<void> {
     await loadSourceAccounts();
@@ -42,15 +51,53 @@ async function onSourceCostumerChange(): Promise<void> {
             value: a.id,
         };
     });
+    sourceAccountSelected.value = null;
+    clearTarget();
 }
 
 function onSourceAccountChange(): void {
-
+    clearTarget();
 }
+
+function clearTarget(): void {
+    targetCostumerSelected.value = null;
+    targetAccounts.value = null;
+    targetAccountSelected.value = null;
+    targetAccountOptions.value = null;
+}
+
 
 async function loadSourceAccounts(): Promise<void> {
     const response = await accountService.getCostumerAccounts(sourceCostumerSelected.value.value);
     sourceAccounts.value = response.accounts;
+}
+
+async function onTargetCostumerChange(): Promise<void> {
+    await loadTargetAccounts();
+    targetAccountOptions.value = targetAccounts.value
+    .filter((a: IAccount)  => a.id != sourceAccountSelected.value?.value)
+    .map(a => {
+        return {
+            label: a.name,
+            value: a.id,
+        };
+    });
+    targetAccountSelected.value = null;
+}
+
+async function loadTargetAccounts(): Promise<void> {
+    const response = await accountService.getCostumerAccounts(targetCostumerSelected.value.value);
+    targetAccounts.value = response.accounts;
+}
+
+function continuerStep2Disabled(): boolean {
+    return targetAccountSelected.value == null || notEnoughCredit();
+}
+
+function notEnoughCredit(): boolean {
+    const sourceAccount = sourceAccounts.value.find(s => s.id === sourceAccountSelected?.value.value);
+    const balance = sourceAccount.balance;
+    return balance <= 0;
 }
 
 </script>
@@ -92,13 +139,13 @@ async function loadSourceAccounts(): Promise<void> {
                         outlined 
                         v-model="sourceAccountSelected" 
                         :options="sourceAccountOptions"
-                        label="Account" 
+                        label="Account"
                         @update:model-value="onSourceAccountChange()" 
                         style="min-width: 250px; max-width: 300px" 
                     />
                 </div>
                 <q-stepper-navigation>
-                    <q-btn @click="onStepOneContinue()" :disable="sourceAccountSelected == null" color="primary" label="Continue" />
+                    <q-btn @click="step = 2" :disable="sourceAccountSelected == null" color="primary" label="Continue" />
                 </q-stepper-navigation>
             </q-step>
 
@@ -108,9 +155,31 @@ async function loadSourceAccounts(): Promise<void> {
                 icon="credit_card"
                 :done="step > 2"
             >
-                
+                <div class="q-pa-sm" >                    
+                    <q-select 
+                        outlined 
+                        v-model="targetCostumerSelected" 
+                        :options="targetCostumerOptions"
+                        label="Costumer" 
+                        @update:model-value="onTargetCostumerChange()" 
+                        style="min-width: 250px; max-width: 300px" 
+                    />
+                </div>
+                <div v-if="sourceCostumerSelected != null" class="q-pa-sm" >                    
+                    <q-select 
+                        outlined 
+                        v-model="targetAccountSelected" 
+                        :options="targetAccountOptions"
+                        label="Account"  
+                        style="min-width: 250px; max-width: 300px" 
+                    />
+                </div>
                 <q-stepper-navigation>
-                    <q-btn @click="step = 3" color="primary" label="Continue" />
+                    <q-btn @click="step = 3" :disable="continuerStep2Disabled()" color="primary" label="Continue">
+                        <q-tooltip v-if="continuerStep2Disabled()">
+                            Enabled only if both accounts are selected and there is enoug credit in the source account
+                        </q-tooltip>
+                    </q-btn>
                     <q-btn flat @click="step = 1" color="primary" label="Back" class="q-ml-sm" />
                 </q-stepper-navigation>
             </q-step>
