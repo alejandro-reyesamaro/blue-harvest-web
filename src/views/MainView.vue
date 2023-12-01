@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onBeforeMount } from "vue";
 import { IAddCostumerForm, type ICostumer, type IAllCostumersResponse } from "@/models";
-import { CostumersView, AccountsView, TransfersView } from "./../views";
+import { CostumersView, AccountsView, TransfersView, TransactionsView } from "./../views";
 import { useAppStore } from "@/stores";
 
 const appStore = useAppStore();
@@ -43,6 +43,7 @@ async function loadCostumers(): Promise<void> {
                     <q-tab name="CST" label="Costumers" />
                     <q-tab name="ACC" label="Account" />
                     <q-tab name="TRF" label="Transactions" />
+                    <q-tab name="MKTRF" label="Make a transaction" />
                 </q-tabs>
             </q-card>
         </div>
@@ -54,6 +55,9 @@ async function loadCostumers(): Promise<void> {
         <accounts-view :costumers="costumers" />
     </div>
     <div v-if="tab === 'TRF'">
+        <transactions-view :costumers="costumers" />
+    </div>
+    <div v-if="tab === 'MKTRF'">
         <transfers-view :costumers="costumers" />
     </div>
 </template>

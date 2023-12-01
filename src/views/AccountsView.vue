@@ -2,8 +2,6 @@
 import { ref, onBeforeMount } from "vue";
 import { IAddAccountForm, type ICostumer, type IAccount } from "@/models";
 import { AccountService } from "@/services";
-import { CostumerAccountsView } from "./../components";
-import { log } from "console";
 
 const accountService = new AccountService();
 const addDialog = ref<boolean>(false);
