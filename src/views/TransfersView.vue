@@ -1,10 +1,11 @@
 <script lang="ts" setup>
 import { ref, onBeforeMount } from "vue";
-import { type ICostumer, type IAccount } from "@/models";
-import { AccountService } from "@/services";
+import { type ICostumer, type IAccount, type IAddTransactionForm } from "@/models";
+import { AccountService, TransactionService } from "@/services";
 
 const step = ref<number>(1);
 const accountService = new AccountService();
+const transactionService = new TransactionService();
 
 const sourceCostumerSelected = ref(null);
 const sourceCostumerOptions = ref<any[]>([]);
@@ -68,10 +69,24 @@ function clearTarget(): void {
     targetAccountOptions.value = null;
 }
 
+function clearSource(): void {
+    sourceCostumerSelected.value = null;
+    sourceAccounts.value = null;
+    sourceAccountSelected.value = null;
+    sourceAccountOptions.value = null;
+}
 
 async function loadSourceAccounts(): Promise<void> {
     const response = await accountService.getCostumerAccounts(sourceCostumerSelected.value.value);
     sourceAccounts.value = response.accounts;
+}
+
+function getSourceAccountCredit(): number {
+    return sourceAccounts.value.find(a => a.id === sourceAccountSelected?.value.value).balance;
+}
+
+function getTargetAccountCredit(): number {
+    return targetAccounts.value.find(a => a.id === targetAccountSelected?.value.value).balance;
 }
 
 async function onTargetCostumerChange(): Promise<void> {
@@ -112,6 +127,19 @@ function tooMuchAmount(): boolean {
     return balance < amount.value;
 }
 
+async function onFinish(): Promise<void> {
+    const form: IAddTransactionForm = {
+        costumerId: sourceCostumerSelected?.value.value,
+        costumerAccountId: sourceAccountSelected?.value.value,
+        targetAccountId: targetAccountSelected?.value.value,
+        amount: amount.value,
+    };
+    await transactionService.add(form);
+    step.value = 1;
+    clearSource();
+    clearTarget();
+}
+
 </script>
 
 <style lang="sass">
@@ -123,7 +151,11 @@ function tooMuchAmount(): boolean {
 .card
   width: 100%
   max-width: 250px
-
+.flat-card
+  width: 100%
+  min-width: 250px
+  max-width: 300px
+  padding: 10px
 </style>
 
 <template>
@@ -160,6 +192,11 @@ function tooMuchAmount(): boolean {
                         style="min-width: 250px; max-width: 300px" 
                     />
                 </div>
+                <div v-if="sourceAccountSelected != null" class="q-pa-sm" >
+                    <q-card flat bordered class="flat-card">
+                        Credit: ${{getSourceAccountCredit()}}
+                    </q-card>
+                </div>
                 <q-stepper-navigation>
                     <q-btn @click="step = 2" :disable="sourceAccountSelected == null" color="primary" label="Continue" />
                 </q-stepper-navigation>
@@ -181,7 +218,7 @@ function tooMuchAmount(): boolean {
                         style="min-width: 250px; max-width: 300px" 
                     />
                 </div>
-                <div v-if="sourceCostumerSelected != null" class="q-pa-sm" >                    
+                <div v-if="targetCostumerSelected != null" class="q-pa-sm" >                    
                     <q-select 
                         outlined 
                         v-model="targetAccountSelected" 
@@ -189,6 +226,11 @@ function tooMuchAmount(): boolean {
                         label="Account"  
                         style="min-width: 250px; max-width: 300px" 
                     />
+                </div>
+                <div v-if="targetAccountSelected != null" class="q-pa-sm" >
+                    <q-card flat bordered class="flat-card">
+                        Credit: ${{getTargetAccountCredit()}}
+                    </q-card>
                 </div>
                 <q-stepper-navigation>
                     <q-btn @click="step = 3" :disable="continuerStep2Disabled()" color="primary" label="Continue">
@@ -231,7 +273,7 @@ function tooMuchAmount(): boolean {
                 <div class="q-pa-md row items-start q-gutter-md">
                     <q-card class="card">
                         <q-card-section>
-                            <div class="text-h7">Source: <b>{{sourceAccountSelected?.label}}</b></div>
+                            <div class="text-h7">Source: <b>{{sourceAccountSelected?.label}}</b> (${{getSourceAccountCredit()}})</div>
                             <div class="text-subtitle3">by {{sourceCostumerSelected?.label}}</div>
                         </q-card-section>
                     </q-card>
@@ -239,7 +281,7 @@ function tooMuchAmount(): boolean {
                 <div class="q-pa-md row items-start q-gutter-md">
                     <q-card class="card">
                         <q-card-section>
-                            <div class="text-h7">Target: <b>{{targetAccountSelected?.label}}</b></div>
+                            <div class="text-h7">Target: <b>{{targetAccountSelected?.label}}</b> (${{getTargetAccountCredit()}})</div>
                             <div class="text-subtitle3">by {{targetCostumerSelected?.label}}</div>
                         </q-card-section>
                     </q-card>
@@ -252,7 +294,7 @@ function tooMuchAmount(): boolean {
                     </q-card>
                 </div>
                 <q-stepper-navigation>
-                    <q-btn color="primary" label="Finish" />
+                    <q-btn color="primary" label="Finish" @click="onFinish()"/>
                     <q-btn flat @click="step = 3" color="primary" label="Back" class="q-ml-sm" />
                 </q-stepper-navigation>
             </q-step>
