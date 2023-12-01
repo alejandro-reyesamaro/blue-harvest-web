@@ -42,7 +42,7 @@ async function loadCostumers(): Promise<void> {
                 <q-tabs v-model="tab" dense class="text-grey" active-color="primary" indicator-color="primary" align="justify" narrow-indicator>
                     <q-tab name="CST" label="Costumers" />
                     <q-tab name="ACC" label="Account" />
-                    <q-tab name="TRF" label="Transfers" />
+                    <q-tab name="TRF" label="Transactions" />
                 </q-tabs>
             </q-card>
         </div>
