@@ -1,6 +1,8 @@
+import { type ICostumer } from "./ICostumer";
+
 export interface IAccount {
     id: number;
-    costumerId: number;
+    costumer: ICostumer;
     name: string;
     balance: number;
 }

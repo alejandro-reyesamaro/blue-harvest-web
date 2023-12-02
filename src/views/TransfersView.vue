@@ -48,7 +48,7 @@ onBeforeMount(async () => {
 
 async function onSourceCostumerChange(): Promise<void> {
     await loadSourceAccounts();
-    sourceAccountOptions.value = sourceAccounts.value.map(a => {
+    sourceAccountOptions.value = sourceAccounts.value?.map(a => {
         return {
             label: a.name,
             value: a.id,
@@ -82,17 +82,16 @@ async function loadSourceAccounts(): Promise<void> {
 }
 
 function getSourceAccountCredit(): number {
-    return sourceAccounts.value.find(a => a.id === sourceAccountSelected?.value.value).balance;
+    return sourceAccounts.value?.find(a => a.id === sourceAccountSelected.value?.value).balance;
 }
 
 function getTargetAccountCredit(): number {
-    return targetAccounts.value.find(a => a.id === targetAccountSelected?.value.value).balance;
+    return targetAccounts.value?.find(a => a.id === targetAccountSelected.value?.value).balance;
 }
 
 async function onTargetCostumerChange(): Promise<void> {
     await loadTargetAccounts();
-    targetAccountOptions.value = targetAccounts.value
-    .filter((a: IAccount)  => a.id != sourceAccountSelected.value?.value)
+    targetAccountOptions.value = targetAccounts.value?.filter((a: IAccount)  => a.id != sourceAccountSelected.value?.value)
     .map(a => {
         return {
             label: a.name,

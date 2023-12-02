@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { ref, onBeforeMount } from "vue";
-import { type ICostumer, type ITransaction } from "@/models";
+import { type ICostumer, type ITransaction, type IAccount } from "@/models";
 import { TransactionService } from "@/services";
 
 const transactionService = new TransactionService();
@@ -22,19 +22,27 @@ const props = withDefaults(
 
 const columns = [
     {
-        name: "costumerAccountId",
+        name: "costumerAccountName",
         required: true,
-        label: "Costumer account ID",
+        label: "Costumer account",
         align: "left",
-        field: (row: { costumerAccountId: string }): string => row.costumerAccountId,
+        field: (row: { costumerAccount: IAccount }): String => row.costumerAccount.name,
         sortable: false,
     },
     {
-        name: "targetAccountId",
+        name: "targetAccountName",
         required: true,
-        label: "Target account ID",
+        label: "Target account",
         align: "left",
-        field: (row: { targetAccountId: string }): string => row.targetAccountId,
+        field: (row: { targetAccount: IAccount }): String => row.targetAccount.name,
+        sortable: false,
+    },
+    {
+        name: "targetAccountCostumerName",
+        required: true,
+        label: "Target account owner",
+        align: "left",
+        field: (row: { targetAccount: IAccount }): String => row.targetAccount.costumer.name,
         sortable: false,
     },
     { 
@@ -48,7 +56,7 @@ const columns = [
         name: "date", 
         align: "left", 
         label: "Date", 
-        field: (row: { date: number }): number => row.date, 
+        field: (row: { date: Date }): Date => row.date, 
         sortable: false, 
     },
     { 

@@ -1,8 +1,10 @@
+import { type IAccount } from "./IAccount";
+
 export interface ITransaction {
     id: number;
     costumerId: number;
-    costumerAccountId: number;
-    targetAccountId: number;
+    costumerAccount: IAccount;
+    targetAccount: IAccount;
     amount: number;
     date: Date;
 }
