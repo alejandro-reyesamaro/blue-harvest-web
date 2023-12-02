@@ -2,8 +2,6 @@
 import { ref, onBeforeMount } from "vue";
 import { IAddAccountForm, type ICostumer, type IAccount } from "@/models";
 import { AccountService } from "@/services";
-import { CostumerAccountsView } from "./../components";
-import { log } from "console";
 
 const accountService = new AccountService();
 const addDialog = ref<boolean>(false);
@@ -85,7 +83,7 @@ async function loadAccounts(): Promise<void> {
 </script>
 
 <template>
-    <div class="q-pa-sm" >
+    <div class="q-pa-md" >
         <q-select 
             outlined 
             v-model="selected" 
@@ -94,7 +92,7 @@ async function loadAccounts(): Promise<void> {
             @update:model-value="onChange" 
             style="min-width: 250px; max-width: 300px" />
     </div>
-    <div class="q-pa-md">
+    <div v-if="selected == null || costumerAccounts?.length > 0" class="q-pa-md">
         <q-table
             title="Accounts"
             :rows="costumerAccounts"
@@ -103,6 +101,7 @@ async function loadAccounts(): Promise<void> {
             flat 
             bordered
             selection="multiple"
+            no-data-label="Select a costumer"
             :rows-per-page-options="[10, 15, 20]"
         >
             <template v-slot:top>
@@ -121,7 +120,13 @@ async function loadAccounts(): Promise<void> {
             </template>
         </q-table>
     </div>
-    <div class="q-pa-sm q-gutter-sm">
+    <div v-else class="q-pa-md">
+        <q-icon size="2em" name="sentiment_dissatisfied" />
+        <span>
+            No account found for this costumer
+        </span>
+    </div>
+    <div class="q-pa-md q-gutter-md">
         <q-btn icon="add" color="primary" :disable="selected?.value == null" label="Add account" @click="addDialog = true"/>
     </div>
 

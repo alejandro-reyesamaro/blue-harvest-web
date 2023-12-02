@@ -101,7 +101,7 @@ async function onAdd(): Promise<void> {
             </template>
         </q-table>
     </div>
-    <div class="q-pa-sm q-gutter-sm">
+    <div class="q-pa-md q-gutter-md">
         <q-btn icon="add" color="primary" label="Add costumer" @click="addDialog = true"/>
     </div>
 
