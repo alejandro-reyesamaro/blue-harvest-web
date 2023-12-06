@@ -26,7 +26,7 @@ const columns = [
         required: true,
         label: "Costumer account",
         align: "left",
-        field: (row: { costumerAccount: IAccount }): String => row.costumerAccount.name,
+        field: (row: { costumerAccountName: string }): string => row.costumerAccountName,
         sortable: false,
     },
     {
@@ -34,7 +34,7 @@ const columns = [
         required: true,
         label: "Target account",
         align: "left",
-        field: (row: { targetAccount: IAccount }): String => row.targetAccount.name,
+        field: (row: { targetAccountName: string }): string => row.targetAccountName,
         sortable: false,
     },
     {
@@ -42,7 +42,10 @@ const columns = [
         required: true,
         label: "Target account owner",
         align: "left",
-        field: (row: { targetAccount: IAccount }): String => row.targetAccount.costumer.name,
+        field: (row: { 
+            targetAccountCostumerName: string; 
+            targetAccountCostumerSurname: string;
+        }): string => `${row.targetAccountCostumerName} ${row.targetAccountCostumerSurname}`,
         sortable: false,
     },
     { 
